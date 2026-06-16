@@ -18,3 +18,15 @@ The firmware target runs on an STM32 platform utilizing the **X-CUBE-AI** hardwa
 ## Tech Stack
 * **Frameworks:** PyTorch / TensorFlow, X-CUBE-AI, TinyML
 * **Languages:** Python (Training & Optimization), Embedded C (Hardware Inference)
+
+## Active Hardware Actuation & Peripheral Control
+
+This production iteration shifts beyond purely predicting data arrays to closing the hardware-in-the-loop (HIL) automation system by implementing direct peripheral feedback.
+
+* **Autonomous I2C Bus Diagnostics:** Implements an un-mapped `HAL_I2C_Master_Transmit` address scan sweeping from `0x08` to `0x78` during initial setup boot sequences to dynamically verify sensor attachment sanity prior to running the critical application layers.
+* **Hardware Self-Diagnostic Sequences:** Triggers an automatic startup sweeping test on **TIM2 Channel 3** across structural pulse comparative windows (`50` ➔ `100` ➔ `75`) to calibrate peripheral hardware boundaries.
+* **Deterministic PWM Servo Driving:** Uses mathematical mapping arrays to bind prediction classifications directly to automated physical servos. High-confidence classifications ($\ge 80\%$) programmatically scale real-time duty cycle configurations via `__HAL_TIM_SET_COMPARE`:
+  * **Pitch Detection:** Maps to duty register index `25`.
+  * **Roll Detection:** Maps to duty register index `75`.
+  * **Yaw Detection:** Maps to duty register index `125`.
+* **Low Confidence Safety Rejection:** Automatically filters out classifications dropping below the $0.80$ probability constraint margin to actively prevent false physical servo actuation.
